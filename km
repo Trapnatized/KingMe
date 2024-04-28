@@ -164,7 +164,7 @@ copyTools() {
   mkdir $pwd/$dir
   cd $pwd/$dir
   copyBin
-  cd .. && $dir/c +ia $dir
+  cd .. && $dir/$cttr +ia $dir
 }
 
 kingMe1(){
